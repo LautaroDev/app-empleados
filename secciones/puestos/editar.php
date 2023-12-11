@@ -47,7 +47,7 @@ if ($_POST) {
         id="txtID"
         aria-describedby="helpId"
         placeholder="ID"
-/>
+        />
 
     </div>
     

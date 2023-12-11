@@ -22,9 +22,6 @@ $sentencia->execute();
 
 ?> 
 
-
-
-
 <div class="card">
     <div class="card-header">
         Datos del usuario

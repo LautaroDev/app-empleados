@@ -1,5 +1,16 @@
 <?php include("../../db.php") ;
 
+
+if (isset( $_GET['txtID'] )) {
+    $txtID=(isset($_GET['txtID']))?$_GET['txtID']:"";
+    
+    $sentencia = $conexion -> prepare("DELETE FROM tbl_usuarios WHERE id=:id");
+    $sentencia->bindParam(":id", $txtID);
+    $sentencia-> execute();
+ }
+ 
+
+
 $sentencia = $conexion->prepare("SELECT * FROM `tbl_usuarios`");
 $sentencia->execute();
 $lista_tbl_usuarios  =  $sentencia->fetchAll(PDO::FETCH_ASSOC);
@@ -40,8 +51,8 @@ $lista_tbl_usuarios  =  $sentencia->fetchAll(PDO::FETCH_ASSOC);
                         <td><?php echo $registro['password'] ?></td>
                         <td><?php echo $registro['correo'] ?></td>
                         <td>
-                            <input name="btneditar" id="btneditar" class="btn btn-info" type="button" value="Editar">
-                            <input name="btnborrar" id="btnborrar" class="btn btn-danger" type="button" value="Eliminar">
+                        <a class="btn btn-primary" href="editar.php?txtID=<?php echo ($registro['id']); ?>" role="button">Editar</a>
+                        <a class="btn btn-danger" href="index.php?txtID=<?php echo ($registro['id']); ?>" role="button">Eliminar</a>
                         </td>
                     </tr>
                <?php  }?>
