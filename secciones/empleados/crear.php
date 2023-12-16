@@ -1,4 +1,77 @@
-<?php include("../../templates/header.php") ?> 
+<?php
+ include("../../templates/header.php"); 
+ include("../../db.php");
+ 
+ $token = bin2hex(random_bytes(32));
+ $_SESSION['csrf_token'] = $token;
+
+ print_r($token);
+
+ if ($_POST) {
+  //recolectamos los datos del POST
+  $primernombre=(isset($_POST["primernombre"])?$_POST["primernombre"]:"");
+  $segundonombre=(isset($_POST["segundonombre"])?$_POST["segundonombre"]:"");
+  $primerapellido=(isset($_POST["primerapellido"])?$_POST["primerapellido"]:"");
+  $segundoapellido=(isset($_POST["segundoapellido"])?$_POST["segundoapellido"]:"");
+
+  //Datos de los archivos
+  $foto=(isset($_FILES["foto"]["name"])?$_FILES["foto"]["name"]:"");
+  $cv=(isset($_FILES["cv"]["name"])?$_FILES["cv"]["name"]:"");
+ 
+  $puesto=(isset($_POST["idpuesto"])?$_POST["idpuesto"]:"");
+  $fechadeingreso=(isset($_POST["fechadeingreso"])?$_POST["fechadeingreso"]:"");
+
+  //reviso que los campos no esten vacios.
+  if (empty($primernombre) || empty($segundonombre) || empty($primerapellido) || empty($segundoapellido) || empty($foto) || empty($cv) || empty($puesto) || empty($fechadeingreso)) {
+      echo "Error: Todos los campos deben ser completados.";
+      exit();
+  }
+
+  // Verifica el tipo de archivo para las imágenes y PDF
+  $tipoImagen = ['image/jpeg', 'image/png', 'image/gif'];
+  $tipoPDF = ['application/pdf'];
+
+  if (!in_array($_FILES['foto']['type'], $tipoImagen) || !in_array($_FILES['cv']['type'], $tipoPDF)) {
+      echo "Error: Formato de archivo no válido para la foto o el CV.";
+      exit();
+  }
+
+  if (empty($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf_token']) {
+    echo "Error: Token CSRF no válido.";
+    exit();
+}
+
+  
+
+  //insertamos los registros
+
+  $sentencia=$conexion->prepare("INSERT INTO 
+  tbl_empleados(`id`, `primernombre`,`segundonombre`,`primerapellido`,`segundoapellido`,`foto`,`cv`,`idpuesto`,`fechadeingreso`)
+  VALUES  (NULL, :primernombre ,:segundonombre ,:primerapellido,:segundoapellido ,:foto ,:cv ,:idpuesto ,:fechadeingreso);");
+  
+  $sentencia->bindParam(":primernombre",$primernombre);
+  $sentencia->bindParam(":segundonombre",$segundonombre);
+  $sentencia->bindParam(":primerapellido",$primerapellido);
+  $sentencia->bindParam(":segundoapellido",$segundoapellido);
+
+  $sentencia->bindParam(":foto",$foto);
+  $sentencia->bindParam(":cv",$cv);
+
+  $sentencia->bindParam(":idpuesto",$puesto);
+  $sentencia->bindParam(":fechadeingreso",$fechadeingreso);
+
+  $sentencia->execute();
+
+
+
+ }
+
+ 
+
+$sentencia=$conexion->prepare("SELECT * FROM  `tbl_puesto`");
+$sentencia->execute();
+$lista_tbl_puestos=$sentencia->fetchAll(PDO::FETCH_ASSOC);
+?> 
 
 <br>
 <div class="card">
@@ -8,6 +81,10 @@
     <div class="card-body">
        
     <form action="" method="post" enctype="multipart/form-data">
+
+    <!-- Incluir el token CSRF en el formulario -->
+    <input type="hidden" name="csrf_token" value="<?php echo $token; ?>">
+
     <div class="mb-3">
       <label for="primernombre" class="form-label">Primer Nombre</label>
       <input type="text"
@@ -43,13 +120,15 @@
     </div>
 
     <div class="mb-3">
-        <label for="idpuesto" class="form-label">Puesto: </label>
+        <label for="idpuesto" class="form-label">Puesto</label>
+
         <select class="form-select form-select-sm" name="idpuesto" id="idpuesto">
-            <option selected>Select one</option>
-            <option value="">New Delhi</option>
-            <option value="">Istanbul</option>
-            <option value="">Jakarta</option>
+            <?php foreach ($lista_tbl_puestos as $registro) { ?>
+                <option value="<?php echo $registro['id'];?>">
+                <?php echo $registro['nombredelpuesto']; ?></option>
+            <?php } ?>
         </select>
+
     </div>
 
     <div class="mb-3">

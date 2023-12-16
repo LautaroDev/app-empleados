@@ -34,14 +34,7 @@ if ($_POST) {
     $sentencia->bindParam(":correo", $correo);
     $sentencia->bindParam(":password", $password);
     $sentencia->bindParam(":id", $txtID);
-
-    // Ejecutamos la consulta
-    if ($sentencia->execute()) {
-        echo "¡Registro actualizado correctamente!";
-        header("Location:index.php");
-    } else {
-        echo "Error al actualizar el registro.";
-    }
+    header("Location:index.php");
 }
 ?>
 <!-- Resto del código HTML -->
